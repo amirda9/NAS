@@ -21,11 +21,12 @@ from tensorboardX import SummaryWriter
 from tqdm import tqdm
 from copy import deepcopy
 import torch.nn.functional as F
-from architect import Architect_gen, Architect_dis
 from utils.flop_benchmark import print_FLOPs
 
 torch.backends.cudnn.enabled = True
 torch.backends.cudnn.benchmark = True
+
+
 
 
 def main():
@@ -58,7 +59,7 @@ def main():
     basemodel_dis = eval('archs.' + args.arch + '.Discriminator')(args=args)
     dis_net = torch.nn.DataParallel(basemodel_dis, device_ids=args.gpu_ids).cuda(args.gpu_ids[0])
 
-    architect_gen = Architect_gen(gen_net, args)
+    # architect_gen = Architect_gen(gen_net, args)
     architect_dis = Architect_dis(dis_net, args)
 
     # weight init
@@ -170,7 +171,7 @@ def main():
         # search arch and train weights
         if epoch > 0:
             train(args, gen_net, dis_net, gen_optimizer, dis_optimizer, gen_avg_param, train_loader, epoch, writer_dict,
-                  lr_schedulers, architect_gen=architect_gen, architect_dis=architect_dis)
+                  lr_schedulers, architect_dis=architect_dis)
 
         # save and visualise current searched arch
         if epoch == 0 or epoch % args.derive_freq == 0 or epoch == int(args.max_epoch_D) - 1:

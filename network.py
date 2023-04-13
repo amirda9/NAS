@@ -35,6 +35,7 @@ def train(args, gen_net: nn.Module, dis_net: nn.Module, gen_optimizer, dis_optim
         real_imgs = imgs.type(torch.cuda.FloatTensor)
         real_imgs_w = real_imgs[:imgs.shape[0] // 2]
         real_imgs_arch = real_imgs[imgs.shape[0] // 2:]
+        # print(real_imgs_w.shape, real_imgs_arch.shape)
 
         # sample noise
         z = torch.cuda.FloatTensor(np.random.normal(0, 1, (imgs.shape[0] // 2, args.latent_dim)))
@@ -109,17 +110,16 @@ def train(args, gen_net: nn.Module, dis_net: nn.Module, gen_optimizer, dis_optim
 
         if architect_gen:
             # deriving arch of G/D during searching
-            derive_freq_iter = math.floor((args.max_iter_D / args.max_epoch_D) / args.derive_per_epoch)
-            if (args.derive_per_epoch > 0) and (iter_idx % derive_freq_iter == 0):
-                genotype_G = alpha2genotype(gen_net.module.alphas_normal, gen_net.module.alphas_up, save=True,
+            if iter_idx % 100 == 0:
+                genotype_G = alpha2genotype(gen_net.alphas_normal, gen_net.alphas_up, save=True,
                                             file_path=os.path.join(args.path_helper['genotypes_path'], str(epoch)+'_'+str(iter_idx)+'_G.npy'))
-                genotype_D = beta2genotype(dis_net.module.alphas_normal, dis_net.module.alphas_down, save=True,
-                                           file_path=os.path.join(args.path_helper['genotypes_path'], str(epoch)+'_'+str(iter_idx)+'_D.npy'))
-                if args.draw_arch:
-                    draw_graph_G(genotype_G, save=True,
-                                 file_path=os.path.join(args.path_helper['graph_vis_path'], str(epoch)+'_'+str(iter_idx)+'_G'))
-                    draw_graph_D(genotype_D, save=True,
-                                 file_path=os.path.join(args.path_helper['graph_vis_path'], str(epoch)+'_'+str(iter_idx)+'_D'))
+                genotype_D = beta2genotype(dis_net.alphas_normal, dis_net.alphas_down, save=True,
+                                        file_path=os.path.join(args.path_helper['genotypes_path'], str(epoch)+'_'+str(iter_idx)+'_D.npy'))
+            
+                draw_graph_G(genotype_G, save=True,
+                                file_path=os.path.join(args.path_helper['graph_vis_path'], str(epoch)+'_'+str(iter_idx)+'_G'))
+                draw_graph_D(genotype_D, save=True,
+                                file_path=os.path.join(args.path_helper['graph_vis_path'], str(epoch)+'_'+str(iter_idx)+'_D'))
 
 
 def validate(args, fixed_z, fid_stat, gen_net: nn.Module, writer_dict):

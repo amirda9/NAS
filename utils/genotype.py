@@ -56,7 +56,7 @@ def alpha2genotype(alpha_normal, alpha_up, save=False, file_path=None):
 
     # hard rules
     for cell_i in range(num_cell):
-        # node3 of all cell must has a input feature
+        # node3 of all cell must have an input feature
         if genotype[cell_i][2] + genotype[cell_i][3] == 0:
             edge_j = np.argmin([alpha_normal[cell_i][2 - offset][0], alpha_normal[cell_i][3 - offset][0]])
             genotype[cell_i][offset + edge_j] = np.argmax(np.delete(alpha_normal[cell_i][edge_j], 0)) + 1
